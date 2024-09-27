@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API SLA</title>
+</head>
+
+<body>
+    <h1>Calculate SLA</h1>
+    <form id="sla-form">
+        <label for="sla">SLA Value:</label>
+        <input type="number" id="sla" name="sla" required>
+
+        <label for="period">Period:</label>
+        <select id="period" name="period" required>
+            <option value="yearly">Yearly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="monthly">Monthly</option>
+            <option value="daily">Daily</option>
+        </select>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('sla-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const slaValue = document.getElementById('sla').value;
+            const period = document.getElementById('period').value;
+
+            try {
+                const response = await fetch('/.netlify/functions/sla', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ sla: slaValue, period: period }),
+                });
+
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    document.getElementById('result').innerText =
+                        `Hours: ${result.data.nbHours}, Minutes: ${result.data.nbMinutes}, Seconds: ${result.data.nbSeconds}`;
+                } else {
+                    document.getElementById('result').innerText = `Error: ${result.reason}`;
+                }
+
+            } catch (error) {
+                document.getElementById('result').innerText = 'An error occurred';
+            }
+        });
+    </script>
+</body>
+
+</html>
